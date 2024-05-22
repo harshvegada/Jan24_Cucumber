@@ -544,6 +544,11 @@ abstract public class ControlActions {
 		}
 	}
 
+	public static byte[] takeScreenShot() {
+		TakesScreenshot ts = (TakesScreenshot) driver;
+		return ts.getScreenshotAs(OutputType.BYTES);
+	}
+	
 	public static void closeBrowser() {
 		driver.quit();
 	}

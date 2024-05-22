@@ -13,7 +13,7 @@ Feature: Verfiy Login feature
   Scenario: verify login using invalid credentials
     Given User is on Login Page
     When User enter username as "rajshri@gmail.com"
-    And User enter password as "January@1234"
+    And User enter password as "1January@1234"
     And User click on login button
     Then User verify authentication failure popup is displayed
     Then User verify user is on Login Page

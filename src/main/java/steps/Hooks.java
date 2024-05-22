@@ -17,7 +17,7 @@ public class Hooks {
 	@After
 	public void afterScenario(Scenario scenario) {
 		if(scenario.isFailed()) {
-			scenario.attach("byte format","media type -> jpeg or png","SS title");
+			scenario.attach(ControlActions.takeScreenShot(),"image/png",scenario.getName());
 		}
 		ControlActions.closeBrowser();
 	}
