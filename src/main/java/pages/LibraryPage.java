@@ -32,7 +32,7 @@ public class LibraryPage extends ControlActions{
 	private WebElement spinnerElement;
 	
 	public LibraryPage() {
-		PageFactory.initElements(driver, this);
+		PageFactory.initElements(driverThread.get(), this);
 	}
 	
 	public void waitForLibraryPageLoaded() {

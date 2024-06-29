@@ -40,7 +40,7 @@ public class CreateQuestionPage extends ControlActions{
 	private WebElement searchSKillInputElement;
 	
 	public CreateQuestionPage() {
-		PageFactory.initElements(driver, this);
+		PageFactory.initElements(driverThread.get(), this);
 	}
 	
 	public void clickOnMCQ() {

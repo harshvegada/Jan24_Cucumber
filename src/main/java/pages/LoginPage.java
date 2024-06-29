@@ -33,7 +33,7 @@ public class LoginPage extends ControlActions{
 	private WebElement genericErrorPopUpElement;
 	
 	public LoginPage() {
-		PageFactory.initElements(driver, this);
+		PageFactory.initElements(driverThread.get(), this);
 	}
 	
 	public boolean isSignInVisibile() {

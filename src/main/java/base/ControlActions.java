@@ -35,9 +35,9 @@ import utility.TimeStamp;
 
 abstract public class ControlActions {
 
-	protected static WebDriver driver;
-	protected static WebDriverWait wait;
-	protected static Actions action;
+	protected static ThreadLocal<WebDriver> driverThread = new ThreadLocal<WebDriver>();
+	protected static ThreadLocal<WebDriverWait> waitThread = new ThreadLocal<WebDriverWait>();
+	protected static ThreadLocal<Actions> actionThread = new ThreadLocal<Actions>();
 
 	public static void launchBrowser() {
 		System.out.println("STEP - Launch Browser");
@@ -48,23 +48,23 @@ abstract public class ControlActions {
 		}
 		System.out.println("###############BROWSER###########" + browser);
 		if (browser.equalsIgnoreCase("chrome"))
-			driver = new ChromeDriver();
+			driverThread.set(new ChromeDriver());
 		else if (browser.equalsIgnoreCase("firefox"))
-			driver = new FirefoxDriver();
+			driverThread.set(new FirefoxDriver());
 		else if (browser.equalsIgnoreCase("IE"))
-			driver = new InternetExplorerDriver();
+			driverThread.set(new InternetExplorerDriver());
 		else
 			throw new BrowserInvalidException(
 					browser + " is not supported, only supported browsers are chrome, firefox and IE");
 
-		driver.manage().window().maximize();
-		wait = new WebDriverWait(driver, Duration.ofSeconds(ConstantPath.WAIT));
-		action = new Actions(driver);
+		driverThread.get().manage().window().maximize();
+		waitThread.set(new WebDriverWait(driverThread.get(), Duration.ofSeconds(ConstantPath.WAIT)));
+		actionThread.set(new Actions(driverThread.get()));
 
 		System.out.println("STEP - load URL");
 
 		String url = propOperation.getValue("url");
-		driver.get(url);
+		driverThread.get().get(url);
 	}
 
 	public static void launchBrowser(String browserType) {
@@ -81,27 +81,27 @@ abstract public class ControlActions {
 
 		System.out.println("###############BROWSER###########" + browser);
 		if (browser.equalsIgnoreCase("chrome"))
-			driver = new ChromeDriver();
+			driverThread.set(new ChromeDriver());
 		else if (browser.equalsIgnoreCase("firefox"))
-			driver = new FirefoxDriver();
+			driverThread.set(new FirefoxDriver());
 		else if (browser.equalsIgnoreCase("IE"))
-			driver = new InternetExplorerDriver();
+			driverThread.set(new InternetExplorerDriver());
 		else
 			throw new BrowserInvalidException(
 					browser + " is not supported, only supported browsers are chrome, firefox and IE");
 
-		driver.manage().window().maximize();
-		wait = new WebDriverWait(driver, Duration.ofSeconds(ConstantPath.WAIT));
-		action = new Actions(driver);
+		driverThread.get().manage().window().maximize();
+		waitThread.set(new WebDriverWait(driverThread.get(), Duration.ofSeconds(ConstantPath.WAIT)));
+		actionThread.set(new Actions(driverThread.get()));
 
 		System.out.println("STEP - load URL");
 
 		String url = propOperation.getValue("url");
-		driver.get(url);
+		driverThread.get().get(url);
 	}
 
 	protected WebElement smartWaitOnVisibilityOfElement(By by, int pollingTime) {
-		WebElement targetElement = new FluentWait<WebDriver>(driver).withTimeout(Duration.ofSeconds(ConstantPath.WAIT))
+		WebElement targetElement = new FluentWait<WebDriver>(driverThread.get()).withTimeout(Duration.ofSeconds(ConstantPath.WAIT))
 				.pollingEvery(Duration.ofMillis(pollingTime)).ignoring(NoSuchElementException.class)
 				.until(ExpectedConditions.visibilityOfElementLocated(by));
 		return targetElement;
@@ -109,9 +109,9 @@ abstract public class ControlActions {
 
 	protected WebElement getElement(By by, boolean isWaitRequired) {
 		if (isWaitRequired)
-			return wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+			return waitThread.get().until(ExpectedConditions.visibilityOfElementLocated(by));
 		else
-			return driver.findElement(by);
+			return driverThread.get().findElement(by);
 	}
 
 	/*
@@ -125,63 +125,63 @@ abstract public class ControlActions {
 
 	protected WebElement getElement(String locatorType, String locatorValue, boolean isWaitRequired, int timeout) {
 		WebElement element = null;
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+		WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeout));
 
 		switch (locatorType.toUpperCase()) {
 		case "ID":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(locatorValue)));
 			else
-				element = driver.findElement(By.id(locatorValue));
+				element = driverThread.get().findElement(By.id(locatorValue));
 			break;
 
 		case "NAME":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name(locatorValue)));
 			else
-				element = driver.findElement(By.name(locatorValue));
+				element = driverThread.get().findElement(By.name(locatorValue));
 			break;
 
 		case "XPATH":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorValue)));
 			else
-				element = driver.findElement(By.xpath(locatorValue));
+				element = driverThread.get().findElement(By.xpath(locatorValue));
 			break;
 
 		case "CSS":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(locatorValue)));
 			else
-				element = driver.findElement(By.cssSelector(locatorValue));
+				element = driverThread.get().findElement(By.cssSelector(locatorValue));
 			break;
 
 		case "LINKTEXT":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(locatorValue)));
 			else
-				element = driver.findElement(By.linkText(locatorValue));
+				element = driverThread.get().findElement(By.linkText(locatorValue));
 			break;
 
 		case "PARTIALLINKTEXT":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.partialLinkText(locatorValue)));
 			else
-				element = driver.findElement(By.partialLinkText(locatorValue));
+				element = driverThread.get().findElement(By.partialLinkText(locatorValue));
 			break;
 
 		case "CLASSNAME":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(locatorValue)));
 			else
-				element = driver.findElement(By.className(locatorValue));
+				element = driverThread.get().findElement(By.className(locatorValue));
 			break;
 
 		case "TAGNAME":
 			if (isWaitRequired)
 				element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName(locatorValue)));
 			else
-				element = driver.findElement(By.tagName(locatorValue));
+				element = driverThread.get().findElement(By.tagName(locatorValue));
 			break;
 
 		default:
@@ -197,7 +197,7 @@ abstract public class ControlActions {
 
 	protected void clickOnElement(WebElement e) {
 		try {
-			wait.until(ExpectedConditions.elementToBeClickable(e));
+			waitThread.get().until(ExpectedConditions.elementToBeClickable(e));
 			e.click();
 		} catch (ElementClickInterceptedException | TimeoutException ec) {
 			scrollToElement(e);
@@ -207,12 +207,12 @@ abstract public class ControlActions {
 
 	protected void jsClickOnElement(WebElement element) {
 		// WebElement element = driver.findElement(By.xpath("//button[@id='btn1']"));
-		JavascriptExecutor js = (JavascriptExecutor) driver;
+		JavascriptExecutor js = (JavascriptExecutor) driverThread.get();
 		js.executeScript("arguments[0].click();", element);
 	}
 
 	protected void scrollToElement(WebElement e) {
-		JavascriptExecutor je = (JavascriptExecutor) driver;
+		JavascriptExecutor je = (JavascriptExecutor) driverThread.get();
 		je.executeScript("arguments[0].scrollIntoView(true);", e);
 	}
 
@@ -248,7 +248,7 @@ abstract public class ControlActions {
 		try {
 			e.sendKeys(textToBeSet);
 		} catch (Exception exception) {
-			wait.until(ExpectedConditions.visibilityOf(e));
+			waitThread.get().until(ExpectedConditions.visibilityOf(e));
 			scrollToElement(e);
 			e.sendKeys(textToBeSet);
 		}
@@ -266,7 +266,7 @@ abstract public class ControlActions {
 
 	protected void mouseHoverToElement(String locatorType, String locatorValue, boolean isWaitRequired) {
 		WebElement e = getElement(locatorType, locatorValue, isWaitRequired);
-		action.moveToElement(e).build().perform();
+		actionThread.get().moveToElement(e).build().perform();
 	}
 
 	protected boolean isElementDisplayed(String locatorType, String locatorValue, boolean isWaitRequired) {
@@ -280,7 +280,7 @@ abstract public class ControlActions {
 
 	protected boolean isElementDisplayed(By by, int timeout) {
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+			WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeout));
 			WebElement e = wait.until(ExpectedConditions.visibilityOfElementLocated(by));
 			return e.isDisplayed();
 		} catch (Exception ne) {
@@ -290,24 +290,24 @@ abstract public class ControlActions {
 
 	protected boolean isElementDisplayed(WebElement e, boolean isWaitRequired) {
 		if (isWaitRequired)
-			e = wait.until(ExpectedConditions.visibilityOf(e));
+			e = waitThread.get().until(ExpectedConditions.visibilityOf(e));
 		return e.isDisplayed();
 	}
 
 	protected boolean isElementDisplayed(WebElement e, int timeout) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+		WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeout));
 		e = wait.until(ExpectedConditions.visibilityOf(e));
 		return e.isDisplayed();
 	}
 
 	protected void waitForElementVisibility(WebElement e, int timeout) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+		WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeout));
 		wait.until(ExpectedConditions.visibilityOf(e));
 	}
 
 	protected boolean waitForElementVisibility(By by, int timeout) {
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+			WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeout));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(by));
 			return true;
 		} catch (Exception e) {
@@ -316,7 +316,7 @@ abstract public class ControlActions {
 	}
 
 	protected void waitForElementVisibility(WebElement e) {
-		wait.until(ExpectedConditions.visibilityOf(e));
+		waitThread.get().until(ExpectedConditions.visibilityOf(e));
 	}
 
 	protected boolean isElementNotDisplayed(String locatorType, String locatorValue, boolean isWaitRequired) {
@@ -344,8 +344,8 @@ abstract public class ControlActions {
 	}
 
 	private Alert switchToAlert() {
-		wait.until(ExpectedConditions.alertIsPresent());
-		Alert alert = driver.switchTo().alert();
+		waitThread.get().until(ExpectedConditions.alertIsPresent());
+		Alert alert = driverThread.get().switchTo().alert();
 		return alert;
 	}
 
@@ -374,7 +374,7 @@ abstract public class ControlActions {
 	protected boolean waitUntilElementIsInvisible(String locatorType, String locatorValue, boolean isWaitRequired) {
 		try {
 			WebElement e = getElement(locatorType, locatorValue, isWaitRequired);
-			return wait.until(ExpectedConditions.invisibilityOf(e));
+			return waitThread.get().until(ExpectedConditions.invisibilityOf(e));
 		} catch (Exception e) {
 			return true;
 		}
@@ -384,7 +384,7 @@ abstract public class ControlActions {
 			int timeOutInSec) {
 		try {
 			WebElement e = getElement(locatorType, locatorValue, isWaitRequired);
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOutInSec));
+			WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeOutInSec));
 			return wait.until(ExpectedConditions.invisibilityOf(e));
 		} catch (Exception exception) {
 			return true;
@@ -393,7 +393,7 @@ abstract public class ControlActions {
 
 	protected boolean waitUntilElementIsInvisible(WebElement e, int timeOutInSec) {
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOutInSec));
+			WebDriverWait wait = new WebDriverWait(driverThread.get(), Duration.ofSeconds(timeOutInSec));
 			return wait.until(ExpectedConditions.invisibilityOf(e));
 		} catch (Exception exception) {
 			return true;
@@ -401,21 +401,21 @@ abstract public class ControlActions {
 	}
 
 	protected void switchToFrame(WebElement e) {
-		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(e));
+		waitThread.get().until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(e));
 	}
 
 	protected void switchToFrame(String idOrName) {
-		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(idOrName));
+		waitThread.get().until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(idOrName));
 	}
 
 	protected void switchToFrame(int index) {
-		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(index));
+		waitThread.get().until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(index));
 	}
 
 	protected void switchToWindowOrTabBasedOnTitle(String title) {
-		Set<String> allWindowHandle = driver.getWindowHandles();
+		Set<String> allWindowHandle = driverThread.get().getWindowHandles();
 		for (String currentWindowHandle : allWindowHandle) {
-			driver.switchTo().window(currentWindowHandle);
+			driverThread.get().switchTo().window(currentWindowHandle);
 			String currentWindowTitle = getCurrentPageTitle();
 			if (title.equals(currentWindowTitle))
 				break;
@@ -423,19 +423,19 @@ abstract public class ControlActions {
 	}
 
 	protected String getCurrentPageURL() {
-		return driver.getCurrentUrl();
+		return driverThread.get().getCurrentUrl();
 	}
 
 	protected boolean waitForTitleToBe(String title) {
-		return wait.until(ExpectedConditions.titleContains(title));
+		return waitThread.get().until(ExpectedConditions.titleContains(title));
 	}
 
 	protected String getCurrentPageTitle() {
-		return driver.getTitle();
+		return driverThread.get().getTitle();
 	}
 
 	protected void refreshCurrentPage() {
-		driver.navigate().refresh();
+		driverThread.get().navigate().refresh();
 	}
 
 	protected List<WebElement> getAllElements(String locatorType, String locatorValue, boolean isWaitRequired) {
@@ -444,59 +444,59 @@ abstract public class ControlActions {
 		switch (locatorType.toUpperCase()) {
 		case "ID":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.id(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.id(locatorValue)));
 			else
-				element = driver.findElements(By.id(locatorValue));
+				element = driverThread.get().findElements(By.id(locatorValue));
 			break;
 
 		case "NAME":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.name(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.name(locatorValue)));
 			else
-				element = driver.findElements(By.name(locatorValue));
+				element = driverThread.get().findElements(By.name(locatorValue));
 			break;
 
 		case "XPATH":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(locatorValue)));
 			else
-				element = driver.findElements(By.xpath(locatorValue));
+				element = driverThread.get().findElements(By.xpath(locatorValue));
 			break;
 
 		case "CSS":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector(locatorValue)));
 			else
-				element = driver.findElements(By.cssSelector(locatorValue));
+				element = driverThread.get().findElements(By.cssSelector(locatorValue));
 			break;
 
 		case "LINKTEXT":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.linkText(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.linkText(locatorValue)));
 			else
-				element = driver.findElements(By.linkText(locatorValue));
+				element = driverThread.get().findElements(By.linkText(locatorValue));
 			break;
 
 		case "PARTIALLINKTEXT":
 			if (isWaitRequired)
-				element = wait
+				element = waitThread.get()
 						.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.partialLinkText(locatorValue)));
 			else
-				element = driver.findElements(By.partialLinkText(locatorValue));
+				element = driverThread.get().findElements(By.partialLinkText(locatorValue));
 			break;
 
 		case "CLASSNAME":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.className(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.className(locatorValue)));
 			else
-				element = driver.findElements(By.className(locatorValue));
+				element = driverThread.get().findElements(By.className(locatorValue));
 			break;
 
 		case "TAGNAME":
 			if (isWaitRequired)
-				element = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.tagName(locatorValue)));
+				element = waitThread.get().until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.tagName(locatorValue)));
 			else
-				element = driver.findElements(By.tagName(locatorValue));
+				element = driverThread.get().findElements(By.tagName(locatorValue));
 			break;
 
 		default:
@@ -519,7 +519,7 @@ abstract public class ControlActions {
 
 	protected boolean isElementClickable(WebElement e) {
 		try {
-			wait.until(ExpectedConditions.elementToBeClickable(e));
+			waitThread.get().until(ExpectedConditions.elementToBeClickable(e));
 			return true;
 		} catch (Exception exception) {
 			return false;
@@ -532,7 +532,7 @@ abstract public class ControlActions {
 	}
 
 	public static void captureScreenShot(String screenShotName) {
-		TakesScreenshot ts = (TakesScreenshot) driver;
+		TakesScreenshot ts = (TakesScreenshot) driverThread.get();
 		File srcFile = ts.getScreenshotAs(OutputType.FILE);
 
 		try {
@@ -545,11 +545,11 @@ abstract public class ControlActions {
 	}
 
 	public static byte[] takeScreenShot() {
-		TakesScreenshot ts = (TakesScreenshot) driver;
+		TakesScreenshot ts = (TakesScreenshot) driverThread.get();
 		return ts.getScreenshotAs(OutputType.BYTES);
 	}
 	
 	public static void closeBrowser() {
-		driver.quit();
+		driverThread.get().quit();
 	}
 }
