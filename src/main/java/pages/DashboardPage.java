@@ -18,7 +18,7 @@ public class DashboardPage extends ControlActions {
 	WebElement createQuestionBtn;
 	
 	public DashboardPage() {
-		PageFactory.initElements(driver, this);
+		PageFactory.initElements(driverThread.get(), this);
 	}
 	
 	public enum Menu {

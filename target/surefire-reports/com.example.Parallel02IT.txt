@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.example.Parallel02IT
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.248 s -- in com.example.Parallel02IT

@@ -18,7 +18,7 @@ public class AssessmentPage extends ControlActions{
 	private WebElement snapShotsToggleSvgElement;
 	
 	public AssessmentPage() {
-		PageFactory.initElements(driver, this);
+		PageFactory.initElements(driverThread.get(), this);
 	}
 	
 	
@@ -36,7 +36,7 @@ public class AssessmentPage extends ControlActions{
 			return value;
 		}
 	}
-	
+
 	public int getAssessmentCountBasedOnTestStatus(TestStatus status) {
 		String statusLocator = "//span[text()='" + status.getValue() + "']";
 		String str = getElementText("XPATH", statusLocator, false);

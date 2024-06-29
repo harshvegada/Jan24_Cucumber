@@ -12,6 +12,7 @@ utility\EnumExample3$Status.class
 utility\TimeStamp.class
 pages\AssessmentPage$ToggleStatus.class
 pages\AssessmentPage.class
+steps\Hooks.class
 utility\EnumExample2.class
 customexception\InvalidLocatorException.class
 utility\EnumExample2$Menu.class

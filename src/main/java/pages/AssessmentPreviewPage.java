@@ -26,7 +26,7 @@ public class AssessmentPreviewPage extends ControlActions{
 	private WebElement closeCameraPopupBtn;
 	
 	public AssessmentPreviewPage() {
-		PageFactory.initElements(driver, this);
+		PageFactory.initElements(driverThread.get(), this);
 	}
 	
 	public void selectTermsOfUse() {

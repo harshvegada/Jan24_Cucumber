@@ -94,6 +94,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.2.5</version>
 				<configuration>
+					<forkCount>2</forkCount>
 					<includes>
 						<include>**/*IT.java</include>
 					</includes>
